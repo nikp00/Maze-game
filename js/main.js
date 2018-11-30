@@ -1,12 +1,16 @@
 var current, start, end, bug;
-var cell_size = 40;
+var cell_size = 50;
 var grid = [];
 var offset = 20;
 var stack = [];
 var c_size = 800;
-var finished = false;
+var finishedd = false;
 var start_drawing = false;
 var lineWidth = 2;
+var finished = false;
+var start, end;
+var init_solve = true
+var alpha;
 
 function preload() {
   bug = loadImage("img/bug.png");
@@ -32,13 +36,26 @@ function draw() {
   for (var i = 0; i < grid.length; i++) {
     grid[i].render();
   }
+
   for (var j = 0; j < stack.length; j++) {
-    stack[j].renderInStack();
+    if (finished) {
+      //alpha = 100 + index(current.i, current.j) - index(end.i, end.j);
+      console.log(alpha);
+      stack[j].renderInStack(255, 255, 0, 90);
+    } else {
+      stack[j].renderInStack(255, 255, 255, 80);
+    }
   }
 
   current.visited = true;
+
   current.curentCell();
-  if (start_drawing) {
+
+  if (finished && current.j == end.j && current.i == end.i) {
+    finished = false;
+    noLoop();
+  }
+  if (start_drawing && !finished) {
     var next = current.checkNeighbors();
     if (next) {
       next.visited = true;
@@ -47,14 +64,31 @@ function draw() {
       current = next;
     } else if (stack.length > 0) {
       current = stack.pop();
-    }
-
-    if (stack.length == 0 && !finished) {
-      start_end();
-      current = undefined;
+    } else {
       finished = true;
     }
   }
+
+  if (finished && init_solve) {
+    start_end();
+    solve();
+  }
+
+
+  if (finished) {
+    start_drawing = false;
+    init_solve = false;
+    var next = current.solveDirection();
+    if (next) {
+      next.visited = true;
+      stack.push(current);
+      current = next;
+    } else if (stack.length > 0) {
+      current = stack.pop();
+    }
+
+  }
+
 }
 
 function index(i, j) {
@@ -102,11 +136,40 @@ function Cell(i, j) {
       return undefined;
     }
   }
+
+  this.solveDirection = function() {
+    var neighbors = [];
+    var top = grid[index(i, j - 1)];
+    var right = grid[index(i + 1, j)];
+    var bottom = grid[index(i, j + 1)];
+    var left = grid[index(i - 1, j)];
+
+    if (top && !top.visited && !this.walls[0]) {
+      neighbors.push(top);
+    }
+    if (right && !right.visited && !this.walls[1]) {
+      neighbors.push(right);
+    }
+    if (bottom && !bottom.visited && !this.walls[2]) {
+      neighbors.push(bottom);
+    }
+    if (left && !left.visited && !this.walls[3]) {
+      neighbors.push(left);
+    }
+    if (neighbors.length > 0) {
+      var r = floor(random(0, neighbors.length));
+      return neighbors[r];
+
+    } else {
+      return undefined;
+    }
+  }
+
   this.render = function() {
     var x = this.i * cell_size + offset;
     var y = this.j * cell_size + offset;
 
-    stroke(255, 255, 0);
+    stroke(0, 204, 0);
     strokeWeight(lineWidth);
     if (this.walls[0]) {
       line(x, y, x + cell_size, y);
@@ -147,11 +210,11 @@ function Cell(i, j) {
     image(bug, x, y, cell_size, cell_size);
   }
 
-  this.renderInStack = function() {
+  this.renderInStack = function(r, g, b, a) {
     var x = this.i * cell_size + offset;
     var y = this.j * cell_size + offset;
     noStroke();
-    fill(255, 255, 255, 90);
+    fill(r, g, b, a);
     rect(x, y, cell_size, cell_size);
 
   }
@@ -201,5 +264,15 @@ function drawMaze() {
 }
 
 function solve() {
-
+  for (var i = 0; i < grid.length; i++) {
+    grid[i].visited = false;
+    if (grid[i].start) {
+      current = grid[i];
+      start = current;
+      console.log(grid[i].start);
+      console.log(start);
+    } else if (grid[i].end) {
+      end = grid[i];
+    }
+  }
 }

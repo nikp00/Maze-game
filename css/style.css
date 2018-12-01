@@ -12,3 +12,7 @@ button {
 body {
   background: black;
 }
+
+#solve {
+  display: none;
+}

@@ -1,96 +1,109 @@
-var current, start, end, bug;
-var cell_size = 50;
+var current, start, end, bug, alpha, start, end, r_end, r_start;
+var cell_size = 20;
 var grid = [];
 var offset = 20;
 var stack = [];
 var c_size = 800;
-var finishedd = false;
 var start_drawing = false;
 var lineWidth = 2;
 var finished = false;
-var start, end;
-var init_solve = true
-var alpha;
+var init_solve = true;
+var startSolve = false;
+var canSolve = false;
 
+// PRELOADS IMAGE
 function preload() {
   bug = loadImage("img/bug.png");
 }
 
 function setup() {
-  frameRate(10);
+  frameRate(100);
   cols = floor(c_size / cell_size);
   rows = floor(c_size / cell_size);
   createCanvas(c_size + offset * 2, c_size + offset * 2);
+
+  // CREATES THE GRID
   for (var j = 0; j < rows; j++) {
     for (var i = 0; i < cols; i++) {
       var cell = new Cell(i, j);
-      grid.push(cell);
+      grid.push(cell); //ADD'S THE CELL TO THE GRID ARRAY
     }
   }
-  current = grid[0];
+  current = grid[0]; //SETS THE CURRENT CELL TO THE CELL 0
 }
 
 function draw() {
-
   background("black");
+
+  //RENDERS THE GRID OF CELLS
   for (var i = 0; i < grid.length; i++) {
-    grid[i].render();
+    grid[i].render(255, 0, 255, 100);
   }
 
+  //HIGHLIGHTS THE CELLS THAT ARE IN THE STACK
   for (var j = 0; j < stack.length; j++) {
     if (finished) {
-      //alpha = 100 + index(current.i, current.j) - index(end.i, end.j);
-      console.log(alpha);
       stack[j].renderInStack(255, 255, 0, 90);
     } else {
       stack[j].renderInStack(255, 255, 255, 80);
     }
   }
 
-  current.visited = true;
+  current.visited = true; //SETS THE CURRENT CELL TO VISITED
 
-  current.curentCell();
+  current.curentCell(); //RENDERS AN IMAGE IN THE CURRENT CELL
 
-  if (finished && current.j == end.j && current.i == end.i) {
+  //STOPS THE DRAW() LOOP IF THE MAZE IS SOLVED
+  if (canSolve && finished && current.j == end.j && current.i == end.i) {
     finished = false;
     noLoop();
   }
+
+  //STARTS DRAWING IF THE BUTTON IS PRESSED
   if (start_drawing && !finished) {
     var next = current.checkNeighbors();
     if (next) {
       next.visited = true;
-      stack.push(current);
-      removeWalls(current, next);
+      stack.push(current); //PUSHES THE CURRENT CELL TO THE STACK
+      removeWalls(current, next); //REMOVES THE WALLS OF THE CURRENT AND NEXT CELLS
       current = next;
-    } else if (stack.length > 0) {
+    }
+    //IF THE NEXT CELL ISNT AVAILABLE AND THE THERE IS AT LEAST A CELL ON THE STACK, SETS THE CURRENT CELL TO THE LAST CELL THAT WAS ON THE ON TOP OF THE STACK
+    else if (stack.length > 0) {
       current = stack.pop();
-    } else {
+    }
+    //IF THERE ISNT ANYTHING ON THE STACK AND THE NEXT CELL ISNT AVAILABLE IT STOPS THE DRAWING OF THE MAZE
+    else {
       finished = true;
+      document.getElementById('solve').style.display = "block";
+      start_end();
+      current = grid[r_start];
     }
   }
 
-  if (finished && init_solve) {
-    start_end();
+  // IF THE BUTTON WAS PRESSED IT STARTS THE SOLVING
+  if (startSolve) {
     solve();
+    canSolve = true;
+    startSolve = false;
   }
 
-
+  //IF THE DRAWING OF THE MAZE IS STOPPED. IT START DRAWING THE SOLUTION
   if (finished) {
     start_drawing = false;
-    init_solve = false;
     var next = current.solveDirection();
     if (next) {
       next.visited = true;
       stack.push(current);
       current = next;
     } else if (stack.length > 0) {
+      current.visitedSecondTime = true;
       current = stack.pop();
     }
-
   }
-
 }
 
+//GETS INDEX OF 1D ARRAY FROM I,J CORDINATES OF A 2D ARRAY
 function index(i, j) {
   if (i < 0 || j < 0 || i > cols - 1 || j > rows - 1) {
     return -1;
@@ -103,14 +116,14 @@ function Cell(i, j) {
   this.j = j;
   this.walls = [true, true, true, true];
   this.visited = false;
+  this.visitedSecondTime = false;
   this.start = false;
   this.end = false;
   this.ind = index(i, j);
 
-
+  // CHECKS THE AVAILABLE NEIGHBORS OF THE CELL AND ADDS THE AVAILABLE TO THE NEIGHBORS ARRAY
   this.checkNeighbors = function() {
     var neighbors = [];
-
     var top = grid[index(i, j - 1)];
     var right = grid[index(i + 1, j)];
     var bottom = grid[index(i, j + 1)];
@@ -137,6 +150,7 @@ function Cell(i, j) {
     }
   }
 
+  // CHECKS THE AVAILABLE NEIGHBORS OF THE CELL AND ADDS THE AVAILABLE TO THE NEIGHBORS ARRAY
   this.solveDirection = function() {
     var neighbors = [];
     var top = grid[index(i, j - 1)];
@@ -165,7 +179,8 @@ function Cell(i, j) {
     }
   }
 
-  this.render = function() {
+  // RENDERS THE CELL
+  this.render = function(r, g, b, a) {
     var x = this.i * cell_size + offset;
     var y = this.j * cell_size + offset;
 
@@ -179,37 +194,44 @@ function Cell(i, j) {
     }
     if (this.walls[2]) {
       line(x + cell_size, y + cell_size, x, y + cell_size);
-
     }
     if (this.walls[3]) {
       line(x, y + cell_size, x, y);
     }
+    //CHECKS IF THE CELL WAS ALREADY VISITEDS AND RENDERS IT IN A DIFFERENT COLOUR
     if (this.visited) {
       noStroke();
       fill(0, 0, 0, 50);
       rect(x, y, cell_size, cell_size);
     }
+    //CHECKS IF THE CELL IS THE START OF THE MAZES AND RENDERS IT IN A DIFFERENT COLOUR
     if (this.start) {
       noStroke();
       fill(0, 255, 0, 50);
       rect(x, y, cell_size, cell_size);
     }
+    //CHECKS IF THE CELL IS THE END OF THE MAZES AND RENDERS IT IN A DIFFERENT COLOUR
     if (this.end) {
       noStroke();
       fill(255, 0, 0, 50);
       rect(x, y, cell_size, cell_size);
     }
+    //CHECKS IF THE CELL WAS VISITED IN THE ATEMPT OF SOLVING THE MAZE, BUT IS NOT THE CORRECT PATH TO THE END, AND RENDERS IT IN A DIFFERENT COLOUR
+    if (this.visitedSecondTime) {
+      noStroke();
+      fill(r, g, b, a);
+      rect(x, y, cell_size, cell_size);
+    }
   }
 
+  // RENDERS AN IMAGE IN THE PLACE OF THE CURRENT CELL
   this.curentCell = function() {
     var x = this.i * cell_size + offset;
     var y = this.j * cell_size + offset;
-    //noStroke();
-    //fill(255, 255, 255, 50);
-    //rect(x, y, cell_size, cell_size);
     image(bug, x, y, cell_size, cell_size);
   }
 
+  //RENDERS THE CELL IN A DIFFERENT COLOUR IF THE CELL IS IN THE STACK
   this.renderInStack = function(r, g, b, a) {
     var x = this.i * cell_size + offset;
     var y = this.j * cell_size + offset;
@@ -220,6 +242,7 @@ function Cell(i, j) {
   }
 }
 
+//REMOVES THE WALLS OF THE CELL
 function removeWalls(a, b) {
   var x = a.i - b.i;
   if (x === 1) {
@@ -237,13 +260,12 @@ function removeWalls(a, b) {
     a.walls[2] = false;
     b.walls[0] = false;
   }
-
-
 }
 
+// GENERATES A RANDOM START IN THE TOP ROW AND A RANDOM END IN THE LAST ROW
 function start_end() {
-  var r_start = floor(random(0, cols));
-  var r_end = floor(random(grid.length - cols, grid.length));
+  r_start = floor(random(0, cols));
+  r_end = floor(random(grid.length - cols, grid.length));
   if (r_start == r_end) {
     start_end();
   }
@@ -269,10 +291,12 @@ function solve() {
     if (grid[i].start) {
       current = grid[i];
       start = current;
-      console.log(grid[i].start);
-      console.log(start);
     } else if (grid[i].end) {
       end = grid[i];
     }
   }
+}
+
+function solveMaze() {
+  startSolve = true;
 }

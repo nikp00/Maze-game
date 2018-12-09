@@ -8,7 +8,7 @@
   <script type="text/javascript" src="js/p5.js"></script>
   <script type="text/javascript" src="js/p5.sound.js"></script>
   <script type="text/javascript" src="js/hunt_and_kill.js"></script>
-
+  <script type="text/javascript" src="js/astar.js"></script>
 
 
 </head>
@@ -16,12 +16,19 @@
 <body>
   <h1> HUNT AND KILL MAZE GENERATION ALGORITHM </h1>
 
+  <div id="canvasContainer" class="canvasContainer">
+
+  </div>
+
   <nav class="bottom">
     <div class="button" id="draw" onclick="drawMaze()">
       START / STOP
     </div>
-    <div class="button" id="solve" onclick="solveMaze()">
-      SOLVE
+    <div class="button solve" id="solve1" onclick="solveMaze1()">
+      SOLVE (A*)
+    </div>
+    <div class="button solve" id="solve" onclick="solveMaze()">
+      SOLVE (random)
     </div>
     <div class="button" onClick="window.location.reload()">
       RESET

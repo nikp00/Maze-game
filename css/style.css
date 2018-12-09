@@ -95,6 +95,10 @@ a {
   display: block;
 }
 
-#solve, #solve1 {
+#solve {
+  visibility: hidden
+}
+
+#solve1 {
   visibility: hidden
 }

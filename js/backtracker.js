@@ -1,13 +1,18 @@
-var current, start, end, bug, r_end, r_start, wave, mazeScale, currentIndex;
+/*
+RESOURCE:
+  http://weblog.jamisbuck.org/2010/12/27/maze-generation-recursive-backtracking
+*/
+
+var current, start, end, bug, rEnd, rStart, wave, mazeScale, currentIndex;
 var stack = [];
 var grid = [];
 var solutionPath = [];
 var openSet = [];
 var closedSet = [];
-var cell_size = 20;
+var cellSize = 20;
 var offset = 20;
-var c_size = 800;
-var start_drawing = false;
+var canvasSize = 800;
+var startDrawing = false;
 var lineWidth = 2;
 var finished = false;
 var init_solve = true;
@@ -20,6 +25,8 @@ function astar(openSet, closedSet, current, grid) {};
 
 function astarSolution(current) {};
 
+function Cell(i, j) {};
+
 // PRELOADS IMAGE
 function preload() {
   bug = loadImage("img/bug.png");
@@ -28,12 +35,12 @@ function preload() {
 function setup() {
   frameRate(100);
   mazeScale = 1440 / screen.height;
-  c_size = c_size / mazeScale;
-  cell_size = cell_size / mazeScale;
+  canvasSize = canvasSize / mazeScale;
+  cellSize = cellSize / mazeScale;
 
-  cols = floor(c_size / cell_size);
-  rows = floor(c_size / cell_size);
-  createCanvas(c_size + offset * 2, c_size + offset * 2).parent('canvasContainer');
+  cols = floor(canvasSize / cellSize);
+  rows = floor(canvasSize / cellSize);
+  createCanvas(canvasSize + offset * 2, canvasSize + offset * 2).parent('canvasContainer');
 
   // CREATES THE GRID
   for (var j = 0; j < rows; j++) {
@@ -66,13 +73,20 @@ function draw() {
 
   //RENDERS THE GRID OF CELLS
   for (var i = 0; i < grid.length; i++) {
+    //IF THE CELL WAS VISITED AND THE MAZE ISNT FINISHED
     if (grid[i].visited && !finished) {
       grid[i].render(255, 255, 255, 100);
-    } else if (finished) {
+    }
+    //IF THE MAZE IS FINISHED
+    else if (finished) {
       grid[i].render(255, 255, 255, 100);
-    } else if (solutionPath.length > 0) {
+    }
+    //IF THE A* ALGORITHM HAS FOUND THE SOLUTION PATH
+    else if (solutionPath.length > 0) {
       grid[i].render(255, 255, 255, 100);
-    } else {
+    }
+    //IF THE MAZE IS BEING DRAWN
+    else {
       grid[i].render(0, 0, 0, 100);
     }
 
@@ -85,18 +99,20 @@ function draw() {
   //STOPS THE DRAW() LOOP IF THE MAZE IS SOLVED
   if (canSolve && finished && current.j == end.j && current.i == end.i) {
     finished = false;
-
+    //WHEN USING A* THE CURRECT PATH MUST BE DRAWN
     if (solutionAlgo == 1) {
       path = astarSolution(current);
       current = end;
-    } else if (solutionAlgo == 0) {
+    }
+    //WHEN USING RANDOM PATHFINDING THE DRAW() LOOP MUST STOP
+    else if (solutionAlgo == 0) {
       noLoop();
     }
   }
 
 
   //STARTS DRAWING IF THE BUTTON IS PRESSED
-  if (start_drawing && !finished) {
+  if (startDrawing && !finished) {
     wave.freq(100 + (current.i + current.j) * 15);
     var next = current.checkNeighbors();
     if (next) {
@@ -115,16 +131,17 @@ function draw() {
       finished = true;
       document.getElementById('solve').style.visibility = "visible";
       document.getElementById('solve1').style.visibility = "visible";
-      start_end();
-      current = grid[r_start];
+      start_end(); //GENERATES A RANDOM START CELL IN THE FRIST ROW AND A END CELL IN THE LAST ROW
+      current = grid[rStart];
     }
   }
 
-  // IF THE BUTTON WAS PRESSED IT STARTS THE SOLVING
+  // IF THE BUTTON WAS PRESSED, IT STARTS SOLVING THE MAZE
   if (startSolve) {
     solve();
     canSolve = true;
     startSolve = false;
+    //IF THE SELECTED ALGORITHM IS A*, IT ADDS THE START CELL TO THE OPENSET
     if (solutionAlgo == 1) {
       openSet.push(start);
     }
@@ -133,7 +150,7 @@ function draw() {
   //IF THE DRAWING OF THE MAZE IS STOPPED. IT START DRAWING THE SOLUTION
   if (finished) {
     if (solutionAlgo == 0) {
-      start_drawing = false;
+      startDrawing = false;
       var next = current.solveDirection();
       if (next) {
         next.visited = true;
@@ -144,7 +161,7 @@ function draw() {
         current = stack.pop();
       }
     } else if (solutionAlgo == 1) {
-      start_drawing = false;
+      startDrawing = false;
       if (openSet.length > 0) {
         current = astar(openSet, closedSet, current, grid);
         stack.push(current);
@@ -161,150 +178,6 @@ function index(i, j) {
   return i + j * cols;
 }
 
-function Cell(i, j) {
-  this.i = i;
-  this.j = j;
-  this.walls = [true, true, true, true];
-  this.visited = false;
-  this.visitedSecondTime = false;
-  this.start = false;
-  this.end = false;
-  this.ind = index(i, j);
-  this.f = 0;
-  this.g = 0;
-  this.h = 0;
-  this.parentCell;
-
-  // CHECKS THE AVAILABLE NEIGHBORS OF THE CELL AND ADDS THE AVAILABLE TO THE NEIGHBORS ARRAY
-  this.checkNeighbors = function() {
-    var neighbors = [];
-    var top = grid[index(i, j - 1)];
-    var right = grid[index(i + 1, j)];
-    var bottom = grid[index(i, j + 1)];
-    var left = grid[index(i - 1, j)];
-
-    if (top && !top.visited) {
-      neighbors.push(top);
-    }
-    if (right && !right.visited) {
-      neighbors.push(right);
-    }
-    if (bottom && !bottom.visited) {
-      neighbors.push(bottom);
-    }
-    if (left && !left.visited) {
-      neighbors.push(left);
-    }
-    if (neighbors.length > 0) {
-      var r = floor(random(0, neighbors.length));
-      return neighbors[r];
-
-    } else {
-      return undefined;
-    }
-  }
-
-  // CHECKS THE AVAILABLE NEIGHBORS OF THE CELL AND ADDS THE AVAILABLE TO THE NEIGHBORS ARRAY
-  this.solveDirection = function() {
-    var neighbors = [];
-    var top = grid[index(i, j - 1)];
-    var right = grid[index(i + 1, j)];
-    var bottom = grid[index(i, j + 1)];
-    var left = grid[index(i - 1, j)];
-
-    if (top && !top.visited && !this.walls[0]) {
-      neighbors.push(top);
-    }
-    if (right && !right.visited && !this.walls[1]) {
-      neighbors.push(right);
-    }
-    if (bottom && !bottom.visited && !this.walls[2]) {
-      neighbors.push(bottom);
-    }
-    if (left && !left.visited && !this.walls[3]) {
-      neighbors.push(left);
-    }
-
-    if (solutionAlgo == 0) {
-      if (neighbors.length > 0) {
-        var r = floor(random(0, neighbors.length));
-        return neighbors[r];
-      } else {
-        return undefined;
-      }
-    } else if (solutionAlgo == 1) {
-      return neighbors;
-    }
-  }
-
-  // RENDERS THE CELL
-  this.render = function(r, g, b, a) {
-    var x = this.i * cell_size + offset;
-    var y = this.j * cell_size + offset;
-
-    stroke(r, g, b);
-    strokeWeight(lineWidth);
-    if (this.walls[0]) {
-      line(x, y, x + cell_size, y);
-    }
-    if (this.walls[1]) {
-      line(x + cell_size, y, x + cell_size, y + cell_size);
-    }
-    if (this.walls[2]) {
-      line(x + cell_size, y + cell_size, x, y + cell_size);
-    }
-    if (this.walls[3]) {
-      line(x, y + cell_size, x, y);
-    }
-    //CHECKS IF THE CELL WAS ALREADY VISITEDS AND RENDERS IT IN A DIFFERENT COLOUR
-    if (this.visited) {
-      noStroke();
-      fill(0, 0, 0, 50);
-      rect(x, y, cell_size, cell_size);
-    }
-    //CHECKS IF THE CELL IS THE START OF THE MAZES AND RENDERS IT IN A DIFFERENT COLOUR
-    if (this.start) {
-      noStroke();
-      fill(0, 255, 0, 100);
-      rect(x, y, cell_size, cell_size);
-    }
-    //CHECKS IF THE CELL IS THE END OF THE MAZES AND RENDERS IT IN A DIFFERENT COLOUR
-    if (this.end) {
-      noStroke();
-      fill(255, 0, 0, 100);
-      rect(x, y, cell_size, cell_size);
-    }
-    //CHECKS IF THE CELL WAS VISITED IN THE ATEMPT OF SOLVING THE MAZE, BUT IS NOT THE CORRECT PATH TO THE END, AND RENDERS IT IN A DIFFERENT COLOUR
-    if (this.visitedSecondTime) {
-      if (solutionAlgo == 1) {
-        noStroke();
-        fill(0, 150, 0);
-        rect(x, y, cell_size, cell_size);
-      } else if (solutionAlgo == 0) {
-        noStroke();
-        fill(255, 0, 0, 100);
-        rect(x, y, cell_size, cell_size);
-      }
-    }
-  }
-
-  // RENDERS AN IMAGE IN THE PLACE OF THE CURRENT CELL
-  this.curentCell = function() {
-    var x = this.i * cell_size + offset;
-    var y = this.j * cell_size + offset;
-    image(bug, x, y, cell_size, cell_size);
-  }
-
-  //RENDERS THE CELL IN A DIFFERENT COLOUR IF THE CELL IS IN THE STACK
-  this.renderInStack = function(r, g, b, a) {
-    var x = this.i * cell_size + offset;
-    var y = this.j * cell_size + offset;
-    noStroke();
-    fill(r, g, b, a);
-    rect(x, y, cell_size, cell_size);
-
-  }
-}
 
 //REMOVES THE WALLS OF THE CELL
 function removeWalls(a, b) {
@@ -328,30 +201,32 @@ function removeWalls(a, b) {
 
 // GENERATES A RANDOM START IN THE TOP ROW AND A RANDOM END IN THE LAST ROW
 function start_end() {
-  r_start = floor(random(0, cols));
-  r_end = floor(random(grid.length - cols, grid.length));
-  if (r_start == r_end) {
+  rStart = floor(random(0, cols));
+  rEnd = floor(random(grid.length - cols, grid.length));
+  if (rStart == rEnd) {
     start_end();
   }
 
-  grid[r_start].start = true;
-  grid[r_end].end = true;
-  grid[r_start].walls[0] = false;
-  grid[r_end].walls[2] = false;
+  grid[rStart].start = true;
+  grid[rEnd].end = true;
+  grid[rStart].walls[0] = false;
+  grid[rEnd].walls[2] = false;
 
 }
 
+//STARTS / STOPS THE DRAWING OF THE MAZE
 function drawMaze() {
-  if (!start_drawing) {
-    start_drawing = true;
+  if (!startDrawing) {
+    startDrawing = true;
     wave.start();
   } else {
-    start_drawing = false;
+    startDrawing = false;
     wave.stop();
   }
 }
 
 function solve() {
+  //RESETS ALL CELLS
   for (var i = 0; i < grid.length; i++) {
     grid[i].visited = false;
     if (grid[i].start) {
@@ -363,6 +238,7 @@ function solve() {
   }
 }
 
+//RANDOM PATHFINDING
 function solveMaze() {
   if (solvingFirstTime) {
     startSolve = true;
@@ -371,6 +247,7 @@ function solveMaze() {
   }
 }
 
+//A* PATHFINDING ALGORITHM
 function solveMaze1() {
   if (solvingFirstTime) {
     startSolve = true;

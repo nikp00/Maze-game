@@ -58,6 +58,7 @@ function astar(openSet, closedSet, current, grid, currentIndex) {
     openSet.push(children[i]);
 
   }
+  steps++;
   return current;
 }
 
@@ -65,7 +66,14 @@ function astarSolution(current) {
   //ADDS THE CELLS THAT MAKE THE BEST SOLUTION PATH TO THE SOLUTIONPATH
   while (current) {
     current.visitedSecondTime = true;
+    current.visited = false;
     solutionPath.push(current);
+    for (let i = 0; i < stack.length; i++) {
+      if (stack[i] == current) {
+        stack.splice(i, 1);
+      }
+    }
     current = current.parentCell;
+
   }
 }

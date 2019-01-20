@@ -5,26 +5,44 @@
   <meta charset="utf-8">
   <title>Maze</title>
   <link rel="stylesheet" type="text/css" href="css/style.css">
+  <link rel="stylesheet" type="text/css" href="css/sweetalert2.css">
+  <script type="text/javascript" src="js/sweetalert2.all.min.js"></script>
   <link rel="icon" href="img/favicon.png" type="image/png">
-
-
 
 </head>
 
 <body>
   <nav class="menu">
-    <img src="img/bug.png">
+    <img src="img/bug.svg">
     <div class="menuTitle">
       MAZE GAME
     </div>
     <div class="button">
       <a href="backtracker.html">BACKTRACKING MAZE GENERATOR</a>
-
     </div>
+
     <div class="button">
       <a href="hunt_and_kill.html">HUNT AND KILL MAZE GENERATOR</a>
-
     </div>
+
+    <div class="button" onclick="info()">
+      INFO
+    </div>
+    <script>
+      function info() {
+        Swal.fire({
+          type: 'info',
+          title: 'INFO',
+          html: '<div style="text-align:left;">' +
+            'This is a maze generation and pathfinding visualization game. <br> It uses two maze generation algorithms (' +
+            '<a href="http://weblog.jamisbuck.org/2010/12/27/maze-generation-recursive-backtracking" style="text-decoration: underline;display:inline; color: black;" target="blank"> Recursive backtracking</a>, ' +
+            '<a href="http://weblog.jamisbuck.org/2011/1/24/maze-generation-hunt-and-kill-algorithm" style="text-decoration: underline;display:inline; color: black;" target="blank"> Hunt and kill</a> ) and two pathfinding algorithms ( ' +
+            '<a href="https://medium.com/@nicholas.w.swift/easy-a-star-pathfinding-7e6689c7f7b2" style="text-decoration: underline;display:inline; color: black;" target="blank"> A* pathfinding</a>, ' +
+            '<span style=" font-weight: 300; color:black; text-decoration: underline;">random direction algorithm</span> ).' +
+            '<br/><br/><br/></div> <span style="text-align:center;">Nik Prinčič, 2019</span>'
+        });
+      }
+    </script>
   </nav>
 </body>
 

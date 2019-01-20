@@ -3,17 +3,16 @@
 
 <head>
   <meta charset="utf-8">
-  <title>Maze</title>
+  <title>Maze</title>sweetalert2
   <link rel="stylesheet" type="text/css" href="css/style.css">
+  <link rel="stylesheet" type="text/css" href="css/sweetalert2.css">
+  <script type="text/javascript" src="js/sweetalert2.all.min.js"></script>
   <script type="text/javascript" src="js/p5.js"></script>
   <script type="text/javascript" src="js/p5.sound.js"></script>
   <script type="text/javascript" src="js/backtracker.js"></script>
   <script type="text/javascript" src="js/astar.js"></script>
   <script type="text/javascript" src="js/cell.js"></script>
   <link rel="icon" href="img/favicon.png" type="image/png">
-
-
-
 </head>
 
 <body>
@@ -27,10 +26,13 @@
     <div class="button" id="draw" onclick="drawMaze()">
       START / STOP
     </div>
-    <div class="button solve" id="solve1" onclick="solveMaze1()">
+    <div class="button" id="skip" onclick="skipDrawing()">
+      SKIP
+    </div>
+    <div class="button" id="solve1" onclick="solveMaze1()">
       SOLVE (A*)
     </div>
-    <div class="button solve" id="solve" onclick="solveMaze()">
+    <div class="button" id="solve" onclick="solveMaze()">
       SOLVE (random)
     </div>
     <div class="button" onClick="window.location.reload()">

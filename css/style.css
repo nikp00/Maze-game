@@ -95,10 +95,26 @@ a {
   display: block;
 }
 
+/*
 #solve {
-  visibility: hidden
+  visibility: hidden;
 }
 
 #solve1 {
-  visibility: hidden
+  visibility: hidden;
+}
+
+#skip {
+  visibility: hidden;
+}*/
+#solve {
+  display: none;
+}
+
+#solve1 {
+  display: none;
+}
+
+#skip {
+  display: none;
 }

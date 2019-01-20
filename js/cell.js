@@ -83,6 +83,7 @@ function Cell(i, j) {
     var y = this.j * cellSize + offset;
 
     stroke(r, g, b);
+    strokeCap(PROJECT);
     strokeWeight(lineWidth);
     if (this.walls[0]) {
       line(x, y, x + cellSize, y);
@@ -105,21 +106,21 @@ function Cell(i, j) {
     //CHECKS IF THE CELL IS THE START OF THE MAZES AND RENDERS IT IN A DIFFERENT COLOUR
     if (this.start) {
       noStroke();
-      fill(0, 255, 0, 100);
+      fill(0, 255, 0, 200);
       rect(x, y, cellSize, cellSize);
     }
     //CHECKS IF THE CELL IS THE END OF THE MAZES AND RENDERS IT IN A DIFFERENT COLOUR
     if (this.end) {
       noStroke();
-      fill(255, 0, 0, 50);
+      fill(255, 0, 0, 200);
       rect(x, y, cellSize, cellSize);
     }
     //CHECKS IF THE CELL WAS VISITED IN THE ATEMPT OF SOLVING THE MAZE, BUT IS NOT THE CORRECT PATH TO THE END, AND RENDERS IT IN A DIFFERENT COLOUR
     if (this.visitedSecondTime) {
       if (solutionAlgo == 1) {
-        noStroke();
-        fill(0, 150, 0);
-        rect(x, y, cellSize, cellSize);
+        //noStroke();
+        //fill(0, 150, 0, 200);
+        //rect(x, y, cellSize, cellSize);
       } else if (solutionAlgo == 0) {
         noStroke();
         fill(255, 0, 0, 100);
@@ -142,7 +143,15 @@ function Cell(i, j) {
     noStroke();
     fill(r, g, b, a);
     rect(x, y, cellSize, cellSize);
+  }
 
+  //RENDERS THE SOLUTION OF THE ASTAR ALGORITHM
+  this.renderAstarSolution = function(r, g, b, a) {
+    var x = this.i * cellSize + offset;
+    var y = this.j * cellSize + offset;
+    noStroke();
+    fill(r, g, b, a);
+    rect(x, y, cellSize, cellSize);
   }
 
   //RENDERS THE CURENT PATH IN A DIFFERENT COLOUR BEFOR ITS KILLED

@@ -6,3 +6,5 @@ The game is basically a representation of the operation of four different algori
 two (A * and random) find their way out of the maze.
 
 This project was created with HTML5, CSS3, JavaScript (libraries P5.js, SweetAlert2).
+
+![UPN](images/maze.png)
